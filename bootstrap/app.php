@@ -11,7 +11,15 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        /*
+         * =================================================================
+         * 🌐 CONFIGURACIÓN PARA ENTORNO SERVERLESS (VERCEL)
+         * =================================================================
+         * Se configura 'trustProxies' en '*' para confiar en los balanceadores
+         * de carga de Vercel. Esto evita bucles infinitos de redirección HTTPS
+         * y asegura el correcto funcionamiento de las sesiones basadas en cookies.
+         */
+        $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
