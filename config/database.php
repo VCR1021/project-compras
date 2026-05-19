@@ -60,7 +60,10 @@ return [
             'strict' => true,
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
-                Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+            // Cambiamos MYSQL_ATTR_SSL_CA por MYSQL_ATTR_SSL_MODE
+            // 'VERIFY_IDENTITY' asegura la seguridad sin necesitar un archivo .pem
+                PDO::MYSQL_ATTR_SSL_MODE => 'VERIFY_IDENTITY', 
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'), 
             ]) : [],
         ],
 
