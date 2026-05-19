@@ -1,27 +1,40 @@
 <?php
 
-require __DIR__ . '/../vendor/autoload.php';
+// Definir la ruta base temporal
+$tmpDir = '/tmp/laravel';
 
-// Crear directorio temporal para almacenamiento de Laravel en Vercel
-$tmpStorage = '/tmp/laravel';
-if (!is_dir("$tmpStorage/storage/framework/views")) {
-    mkdir("$tmpStorage/storage/framework/views", 0755, true);
-    mkdir("$tmpStorage/storage/framework/cache/data", 0755, true);
-    mkdir("$tmpStorage/storage/framework/sessions", 0755, true);
-    mkdir("$tmpStorage/storage/logs", 0755, true);
-    mkdir("$tmpStorage/bootstrap/cache", 0755, true);
+// Crear estructura de carpetas necesarias
+$dirs = [
+    "$tmpDir/storage/framework/views",
+    "$tmpDir/storage/framework/cache/data",
+    "$tmpDir/storage/framework/sessions",
+    "$tmpDir/storage/logs",
+    "$tmpDir/bootstrap/cache"
+];
+
+foreach ($dirs as $dir) {
+    if (!is_dir($dir)) {
+        mkdir($dir, 0755, true);
+    }
 }
 
-// Inicializar la aplicación
+// Cargar autoloader
+require __DIR__ . '/../vendor/autoload.php';
+
+// Inicializar Laravel
 $app = require_once __DIR__ . '/../bootstrap/app.php';
 
-// Redireccionar las rutas de Laravel a la carpeta temporal volátil
-$app->useStoragePath("$tmpStorage/storage");
+// Sobrescribir rutas de almacenamiento
+$app->useStoragePath("$tmpDir/storage");
 $app->useBootstrapPath("$tmpDir/bootstrap");
 
-// Forzar la configuración de vistas al directorio temporal
-config(['view.compiled' => "$tmpStorage/storage/framework/views"]);
+// ¡IMPORTANTE! 
+// No llames a config() aquí. Vamos a inyectar las configuraciones 
+// mediante variables de entorno que Laravel leerá automáticamente.
+putenv("VIEW_COMPILED_PATH=$tmpDir/storage/framework/views");
+$_ENV['VIEW_COMPILED_PATH'] = "$tmpDir/storage/framework/views";
 
+// Manejar la petición
 $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
 $response = $kernel->handle(
     $request = Illuminate\Http\Request::capture()
