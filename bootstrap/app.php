@@ -15,4 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
-    })->create();
+    })
+    ->withProviders([
+        // Forzar la carga de la configuración serverless antes del enrutamiento
+        \App\Providers\VercelServiceProvider::class,
+    ])
+    ->create();
